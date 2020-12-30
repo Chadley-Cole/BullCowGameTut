@@ -9,6 +9,8 @@ void UBullCowCartridge::BeginPlay() // When the game starts
 
     // :: is know as a Scope Resolution operator
     PrintLine(TEXT("The HiddenWord is: %s."), *HiddenWord); //Debug line
+
+    IsIsogram(HiddenWord);
 }
 
 void UBullCowCartridge::OnInput(const FString& Input) // When the player hits enter
@@ -39,6 +41,20 @@ void UBullCowCartridge::SetupGame()
     PrintLine(TEXT("Guess the %i letter word"), HiddenWord.Len());
     PrintLine(TEXT("Your lives are: %i."), Lives);
     PrintLine(TEXT("Type in your guess and\npress enter to continue..."));
+
+    // const TCHAR HW[] = TEXT("plums");
+    // PrintLine(TEXT("Charaacter 1 of the hidden word is: %c"), HiddenWord[0]);
+    // PrintLine(TEXT("The 4th character of HW is: %c"), HW[3]);
+    //const TCHAR HW[] = {TEXT('c'), TEXT('a'), TEXT('k'), TEXT('e'), TEXT('s'), TEXT('\0')};
+
+
+    // int32 i = 0;
+    // while (i < 10)
+    // {
+    //     PrintLine(TEXT("%i"), i);
+    //     i++;
+    // }
+    
 }
 
 void UBullCowCartridge::EndGame()
@@ -55,17 +71,21 @@ void UBullCowCartridge::ProcessGuess(FString Guess)
         EndGame();
         return;
     }
-    //Check if Isogram
-    // if(!IsIsogram)
-    // {
-    //     PrintLine(TEXT("No repeating letters, guess again"));
-    // }
+    
     if(Guess.Len() != HiddenWord.Len())
     {
         PrintLine(TEXT("The hidden word is %i letters long"), HiddenWord.Len());
         PrintLine(TEXT("Sorry, try guessing again! \nYou have %i lives remaining"), Lives);
         return;
     }
+
+    //Check if Isogram
+    if(!IsIsogram(Guess))
+    {
+        PrintLine(TEXT("No repeating letters, guess again"));
+        return;
+    }
+
     //Remove Life
     PrintLine(TEXT("Lost a life!"));
     --Lives;
@@ -81,4 +101,21 @@ void UBullCowCartridge::ProcessGuess(FString Guess)
     }
     //Show the player Bulls and Cows
     PrintLine(TEXT("Guess again, you have %i lives left"), Lives);
+}
+
+bool UBullCowCartridge::IsIsogram(FString Word) const
+{
+
+    for (int Index = 0; Index < Word.Len(); Index++)
+    {
+        PrintLine(TEXT("%c"), Word[Index]);
+    }
+
+    // For each letter.
+    // Start at element [0].
+    // Compare against the next letter.
+    // Until we reach [Word.Len() -1].
+    // If any return the same return false.
+    
+    return true;
 }
