@@ -2,26 +2,20 @@
 #include "BullCowCartridge.h"
 #include "HiddenWordList.h"
 
+
 void UBullCowCartridge::BeginPlay() // When the game starts
 {
     Super::BeginPlay();
-    GetValidWords(Words);
-    SetupGame();
 
-    PrintLine(TEXT("The number of possible words is %i"), Words.Num());
-    PrintLine(TEXT("The number of valid words is: %i."), GetValidWords(Words).Num());
-    // :: is know as a Scope Resolution operator
-    PrintLine(TEXT("The HiddenWord is: %s."), *HiddenWord); //Debug line
-
+    Isograms = GetValidWords(Words);
     
+    SetupGame();
 }
 
-void UBullCowCartridge::OnInput(const FString& Input) // When the player hits enter
+void UBullCowCartridge::OnInput(const FString& PlayerInput) // When the player hits enter
 {
     // If game is over then do ClearScreen() and then SetupGame()
     // else Checking PlayerGuess
-    
-    //Checking PlayerGuess
     if (bGameOver)
     {
         ClearScreen();
@@ -29,7 +23,7 @@ void UBullCowCartridge::OnInput(const FString& Input) // When the player hits en
     }
     else //Checking PlayerGuess
     {
-        ProcessGuess(Input);  
+        ProcessGuess(PlayerInput);  
     }   
 }
 void UBullCowCartridge::SetupGame()
@@ -37,13 +31,17 @@ void UBullCowCartridge::SetupGame()
     //Welcome the Player
     PrintLine(TEXT("Welcome to the BullCow Game!"));
 
-    HiddenWord = TEXT("cakes");
+    HiddenWord = Isograms[FMath::RandRange(0, Isograms.Num())];
     Lives = HiddenWord.Len();
     bGameOver = false;
 
     PrintLine(TEXT("Guess the %i letter word"), HiddenWord.Len());
+    // :: is know as a Scope Resolution operator
+    PrintLine(TEXT("The HiddenWord is: %s."), *HiddenWord); //Debug line
     PrintLine(TEXT("Your lives are: %i."), Lives);
     PrintLine(TEXT("Type in your guess and\npress enter to continue..."));
+     
+   
 }
 
 void UBullCowCartridge::EndGame()
@@ -52,7 +50,7 @@ void UBullCowCartridge::EndGame()
     PrintLine(TEXT("\nPress Enter to play again."));
 }
 
-void UBullCowCartridge::ProcessGuess(FString Guess)
+void UBullCowCartridge::ProcessGuess(const FString& Guess)
 {
     if (Guess == HiddenWord)
     {
@@ -88,11 +86,14 @@ void UBullCowCartridge::ProcessGuess(FString Guess)
         EndGame();
         return;
     }
-    //Show the player Bulls and Cows
+    FBullCowCount Score = GetBullCows(Guess);
+
+    PrintLine(TEXT("You have %i Bulls and %i Cows"), Score.Bulls, Score.Cows);
+
     PrintLine(TEXT("Guess again, you have %i lives left"), Lives);
 }
 
-bool UBullCowCartridge::IsIsogram(FString Word) const
+bool UBullCowCartridge::IsIsogram(const FString& Word) const
 {
 
     for (int32 Index = 0; Index < Word.Len(); Index++)
@@ -106,13 +107,9 @@ bool UBullCowCartridge::IsIsogram(FString Word) const
         }
     }
     return true;
-    // For each letter.
-    // Start at element [0].
-    // Compare against the next letter.
-    // Until we reach [Word.Len() -1].
-    // If any return the same return false.
 }
-TArray<FString> UBullCowCartridge::GetValidWords(TArray<FString> WordList) const
+
+TArray<FString> UBullCowCartridge::GetValidWords(const TArray<FString>& WordList) const
 {
     TArray<FString> ValidWords;
 
@@ -124,4 +121,30 @@ TArray<FString> UBullCowCartridge::GetValidWords(TArray<FString> WordList) const
         }
     }
      return ValidWords;
+}
+
+FBullCowCount UBullCowCartridge::GetBullCows(const FString& Guess) const
+{
+    // for every index Guess is same as index Hidden, BullCount++
+    // if not a bull was it a cow? if yes CowCount++
+    FBullCowCount Count;
+
+    for (int32 GuessIndex = 0; GuessIndex < Guess.Len(); GuessIndex++)
+    {
+        if (Guess[GuessIndex] == HiddenWord[GuessIndex])
+        {
+            Count.Bulls++;
+            continue;
+        }
+        for (int32 HiddenIndex = 0; HiddenIndex < HiddenWord.Len(); HiddenIndex++) 
+        {
+            if (Guess[GuessIndex] == HiddenWord[HiddenIndex])
+            {
+                Count.Cows++;
+                break;
+            }
+        }
+        
+    }
+    return Count;
 }

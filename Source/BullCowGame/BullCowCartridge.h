@@ -6,6 +6,12 @@
 #include "Console/Cartridge.h"
 #include "BullCowCartridge.generated.h" 
 
+struct FBullCowCount
+{
+	int32 Bulls = 0;
+	int32 Cows = 0;
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class BULLCOWGAME_API UBullCowCartridge : public UCartridge
 {
@@ -16,13 +22,17 @@ class BULLCOWGAME_API UBullCowCartridge : public UCartridge
 	virtual void OnInput(const FString& Input) override;
 	void SetupGame();
 	void EndGame();
-	void ProcessGuess(FString Guess);
-	bool IsIsogram(FString Word) const;
-	TArray<FString> GetValidWords(TArray<FString> Words) const;
+	void ProcessGuess(const FString& Guess); //Can remove Guess and Word from this function and below as its ignored
+	bool IsIsogram(const FString& Word) const; //but I leave it in as self documentation of the code.
+	TArray<FString> GetValidWords(const TArray<FString>&WordList) const;
+	
+	//Key identifier that something is an Out Parameter is where it hasn't been written as a const Reference
+	FBullCowCount GetBullCows(const FString& Guess) const;
 
 	// Your declarations go below!
 	private:
 	FString HiddenWord;
 	int32 Lives;
 	bool bGameOver;
+	TArray<FString> Isograms;
 };
